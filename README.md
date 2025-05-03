@@ -1,9 +1,5 @@
 # 📚 Analizador LL(1) - Parser para Gramáticas
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Flask](https://img.shields.io/badge/Flask-2.0%2B-lightgrey)
-![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Compatible-green)
-
 Un analizador sintáctico LL(1) que calcula conjuntos First/Follow, genera la tabla de análisis sintáctico y valida cadenas.
 
 
