@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador LL(1)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="header-title">Analizador LL(1)</h1>
+            <p class="header-subtitle">Ingresa una gramática y una cadena para analizar</p>
+        </div>
+        
+        <div class="content">
+            <div class="panel">
+                <div class="panel-header">
+                    <i class="fas fa-keyboard"></i> Ingresar Gramática y Cadena
+                </div>
+                <div class="panel-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="grammar">
+                                <i class="fas fa-project-diagram"></i> Gramática (Ejemplo: S -> AB)
+                            </label>
+                            <textarea class="form-control" id="grammar" name="grammar" rows="10" placeholder="Escribe tu gramática aquí...">{{ grammar }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="entrada">
+                                <i class="fas fa-terminal"></i> Cadena a Analizar
+                            </label>
+                            <input type="text" class="form-control" id="entrada" name="entrada" placeholder="Ejemplo: abccd" value="{{ entrada }}">
+                        </div>
+                        <button type="submit" class="btn">
+                            <i class="fas fa-play"></i> Analizar
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <i class="fas fa-chart-bar"></i> Resultados de Análisis
+                </div>
+                <div class="panel-body">
+                    <div class="results-section">
+                        <h3 class="results-title">
+                            <i class="fas fa-layer-group"></i> First y Follow
+                        </h3>
+                        <div class="first-follow">
+                            <div class="first-follow-box">
+                                <div class="first-follow-title">First</div>
+                                <div class="first-follow-content">
+                                    {% if first_follow.first != 'N/A' %}
+                                        <pre>{{ first_follow.first }}</pre>
+                                    {% else %}
+                                        <p>No hay datos disponibles</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="first-follow-box">
+                                <div class="first-follow-title">Follow</div>
+                                <div class="first-follow-content">
+                                    {% if first_follow.follow != 'N/A' %}
+                                        <pre>{{ first_follow.follow }}</pre>
+                                    {% else %}
+                                        <p>No hay datos disponibles</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="results-section">
+                        <h3 class="results-title">
+                            <i class="fas fa-table"></i> Resultado del Análisis
+                        </h3>
+                        {% if output %}
+                        <table class="analysis-table">
+                            <thead>
+                                <tr>
+                                    <th>Pila</th>
+                                    <th>Entrada</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for paso in output %}
+                                <tr>
+                                    <td>{{ paso.pila }}</td>
+                                    <td>{{ paso.entrada }}</td>
+                                    <td>{{ paso.accion }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        {% if first_follow.valid %}
+                        <div class="valid-badge">
+                            <i class="fas fa-check-circle"></i> CADENA VÁLIDA
+                        </div>
+                        {% else %}
+                        <div class="invalid-badge">
+                            <i class="fas fa-times-circle"></i> CADENA NO VÁLIDA
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                        <p>No se ha realizado ningún análisis aún.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
