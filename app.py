@@ -6,21 +6,23 @@ app = Flask(__name__)
 @app.route("/", methods=["GET", "POST"])
 def index():
     output = []
-    first_follow = {'first': 'N/A', 'follow': 'N/A'}
+    first_follow = {'first': 'N/A', 'follow': 'N/A', 'valid': False}
     grammar_input = ""
     entrada = ""
+    tabla_predictiva = []
     
     if request.method == "POST":
         grammar_input = request.form.get("grammar", "")
         entrada = request.form.get("entrada", "")
-        output, first_follow = run_parser(grammar_input, entrada)
+        output, first_follow, tabla_predictiva = run_parser(grammar_input, entrada)
     
     return render_template(
         "index.html",
         output=output,
         first_follow=first_follow,
         grammar=grammar_input,
-        entrada=entrada
+        entrada=entrada,
+        tabla_predictiva=tabla_predictiva
     )
 
 def run_parser(grammar_text, cadena_input):
@@ -29,7 +31,7 @@ def run_parser(grammar_text, cadena_input):
     sent = [line.strip() for line in lines if line.strip() != ""]
 
     if not sent or not cadena_input:
-        return [], {'first': 'N/A', 'follow': 'N/A'}
+        return [], {'first': 'N/A', 'follow': 'N/A', 'valid': False}, []
 
     variables = []
     terminales = []
@@ -141,6 +143,36 @@ def run_parser(grammar_text, cadena_input):
             if terminal not in tabla[A]:
                 tabla[A][terminal] = r
 
+    # Agregar acciones EXT y EXP
+    for v in grammar:
+        if grammar[v]["tipo"] == "V":
+            for t in terminales + ['$']:
+                if t not in tabla[v]:
+                    if t in grammar[v]["follow"] or t == '$':
+                        tabla[v][t] = {"Izq": v, "Der": ["EXT"]}
+                    else:
+                        tabla[v][t] = {"Izq": v, "Der": ["EXP"]}
+
+    # Preparar tabla predictiva para mostrar
+    terminales_unicos = list(set(terminales + ['$']))
+    variables_unicas = [v for v in grammar.keys() if grammar[v]["tipo"] == "V"]
+    
+    tabla_predictiva = []
+    for v in variables_unicas:
+        fila = {"variable": v, "producciones": {}}
+        for t in terminales_unicos:
+            if t in tabla[v]:
+                produccion = tabla[v][t]
+                if produccion["Der"][0] == "EXT":
+                    fila["producciones"][t] = "EXT"
+                elif produccion["Der"][0] == "EXP":
+                    fila["producciones"][t] = "EXP"
+                else:
+                    fila["producciones"][t] = f"{produccion['Izq']} → {''.join(produccion['Der'])}"
+            else:
+                fila["producciones"][t] = ""
+        tabla_predictiva.append(fila)
+
     # PARSER
     cadena = cadena_input + "$"
     pila = [start[0]]
@@ -170,11 +202,21 @@ def run_parser(grammar_text, cadena_input):
             break
         elif top in tabla and actual in tabla[top]:
             produccion = tabla[top][actual]
-            output.append({"pila": ' '.join(pila[::-1]), "entrada": cadena[index:], "accion": f"Regla: {produccion['Izq']} → {' '.join(produccion['Der'])}"})
-            pila.pop()
-            if produccion["Der"][0] != 'ε':
-                for sym in reversed(produccion["Der"]):
-                    pila.append(sym)
+            if produccion["Der"][0] == "EXT":
+                output.append({"pila": ' '.join(pila[::-1]), "entrada": cadena[index:], "accion": f"Extraer: {top} (EXT)"})
+                pila.pop()
+            elif produccion["Der"][0] == "EXP":
+                output.append({"pila": ' '.join(pila[::-1]), "entrada": cadena[index:], "accion": f"Explorar: {actual} (EXP)"})
+                index += 1
+                if index >= len(cadena):
+                    output.append({"pila": ' '.join(pila[::-1]), "entrada": "", "accion": "Cadena no válida ❌ (fin de entrada)"})
+                    break
+            else:
+                output.append({"pila": ' '.join(pila[::-1]), "entrada": cadena[index:], "accion": f"Regla: {produccion['Izq']} → {' '.join(produccion['Der'])}"})
+                pila.pop()
+                if produccion["Der"][0] != 'ε':
+                    for sym in reversed(produccion["Der"]):
+                        pila.append(sym)
         else:
             first = grammar[top]["first"]
             follow = grammar[top]["follow"]
@@ -200,7 +242,7 @@ def run_parser(grammar_text, cadena_input):
         'first': '\n'.join(first_output),
         'follow': '\n'.join(follow_output),
         'valid': valid
-    }
+    }, tabla_predictiva
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(debug=True)

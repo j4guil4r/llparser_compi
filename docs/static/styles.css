@@ -243,3 +243,43 @@ textarea:focus, input:focus {
         font-size: 1.8rem;
     }
 }
+
+/* Añadir al final del archivo */
+
+.predictive-table-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.predictive-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+}
+
+.predictive-table th, .predictive-table td {
+    padding: 8px 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.predictive-table th {
+    background: var(--primary-light);
+    color: var(--white);
+    font-weight: 500;
+}
+
+.predictive-table td {
+    background: var(--white);
+}
+
+.predictive-table .variable-cell {
+    background: var(--light);
+    font-weight: 500;
+}
+
+.empty-cell {
+    color: var(--gray);
+    font-style: italic;
+}
