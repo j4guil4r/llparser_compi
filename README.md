@@ -19,3 +19,10 @@ python app.py
 
 # 4. Abrir en navegador
 http://localhost:5000
+
+```
+
+### **Notas adicionales **
+
+Este repo fue creado para intentar deployar, original:
+https://github.com/DarkNight7593/llparser.github.io
