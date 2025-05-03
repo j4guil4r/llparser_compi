@@ -1,0 +1,38 @@
+name: Deploy Flask to GitHub Pages
+on:
+  push:
+    branches: [main]  # Se ejecuta al hacer push a main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Paso 1: Clona el repositorio
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Paso 2: Instala Python y Flask
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          pip install flask
+          pip install requests
+
+      # Paso 3: Ejecuta Flask en segundo plano y guarda el HTML estático
+      - name: Generate static HTML
+        run: |
+          nohup python app.py > /dev/null 2>&1 &  # Inicia Flask en segundo plano
+          sleep 10  # Espera a que Flask esté listo
+          wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 -O docs/index.html http://localhost:5000
+          pkill -f "python app.py"  # Detiene Flask
+
+      # Paso 4: Despliega a GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
