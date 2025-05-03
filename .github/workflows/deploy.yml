@@ -25,11 +25,20 @@ jobs:
       # Paso 3: Ejecuta Flask en segundo plano y guarda el HTML estático
       - name: Generate static HTML
         run: |
-          nohup python app.py > /dev/null 2>&1 &  # Inicia Flask en segundo plano
-          sleep 10  # Espera a que Flask esté listo
-          wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 -O docs/index.html http://localhost:5000
-          pkill -f "python app.py"  # Detiene Flask
+          # Inicia Flask y verifica que esté listo
+          nohup python app.py > flask.log 2>&1 &
+          sleep 15  # Espera más tiempo (15 segundos)
 
+          # Intenta descargar el HTML (con reintentos)
+          for i in {1..3}; do
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3 -O docs/index.html http://localhost:5000 && break
+              sleep 5
+          done
+
+          # Detén Flask y muestra logs para debug
+          pkill -f "python app.py"
+          cat flask.log  # Muestra los logs de Flask en el Action
+          
       # Paso 4: Despliega a GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
