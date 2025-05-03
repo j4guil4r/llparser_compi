@@ -35,9 +35,9 @@ def run_parser(grammar_text, cadena_input):
 
     variables = []
     terminales = []
-    start = [sent[0][0]]  # primer símbolo no terminal
+    start = [sent[0][0]]
 
-    # Limpieza
+    
     for i in range(len(sent)):
         sent[i] = sent[i].replace(" ", "").replace("→", "->")
 
@@ -97,7 +97,7 @@ def run_parser(grammar_text, cadena_input):
             if set(grammar[A]["first"]) != before:
                 changed = True
 
-    # Calcular FOLLOW
+    # Calcular FOLLOWS
     changed = True
     while changed:
         changed = False
@@ -124,7 +124,7 @@ def run_parser(grammar_text, cadena_input):
                     if set(grammar[B]["follow"]) != follow_before:
                         changed = True
 
-    # Llenar tabla predictiva
+    # Llenar tabla
     for r in reglas.values():
         A = r["Izq"]
         alpha = r["Der"]
@@ -143,7 +143,7 @@ def run_parser(grammar_text, cadena_input):
             if terminal not in tabla[A]:
                 tabla[A][terminal] = r
 
-    # Agregar acciones EXT y EXP
+    
     for v in grammar:
         if grammar[v]["tipo"] == "V":
             for t in terminales + ['$']:
@@ -153,7 +153,7 @@ def run_parser(grammar_text, cadena_input):
                     else:
                         tabla[v][t] = {"Izq": v, "Der": ["EXP"]}
 
-    # Preparar tabla predictiva para mostrar
+    
     terminales_unicos = list(set(terminales + ['$']))
     variables_unicas = [v for v in grammar.keys() if grammar[v]["tipo"] == "V"]
     
@@ -229,8 +229,7 @@ def run_parser(grammar_text, cadena_input):
                 if index >= len(cadena):
                     output.append({"pila": ' '.join(pila[::-1]), "entrada": "", "accion": "Cadena no válida ❌ (fin de entrada)"})
                     break
-
-    # Preparar First y Follow para mostrar
+    
     first_output = []
     follow_output = []
     for var in sorted(grammar.keys()):
