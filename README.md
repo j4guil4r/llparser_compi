@@ -12,8 +12,8 @@ Un analizador sintáctico LL(1) que calcula conjuntos First/Follow, genera la ta
 ### **Ejecutar localmente (con Flask)**
 ```bash
 # 1. Clonar repositorio
-git clone https://github.com/tu-usuario/ll1-parser.git
-cd ll1-parser
+git clone https://github.com/j4guil4r/llparser_compi.git
+cd llparser_compi
 
 # 2. Instalar dependencias
 pip install flask
