@@ -6,6 +6,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:  # ¡Nuevo bloque de permisos!
+      contents: write
     steps:
       # Paso 1: Clona el repositorio
       - name: Checkout
@@ -38,7 +40,7 @@ jobs:
           # Detén Flask y muestra logs para debug
           pkill -f "python app.py"
           cat flask.log  # Muestra los logs de Flask en el Action
-          
+
       # Paso 4: Despliega a GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
